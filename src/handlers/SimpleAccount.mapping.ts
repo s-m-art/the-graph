@@ -14,7 +14,7 @@ export function handleInvoked(event: Invoked): void {
   var entity = TransactionEntity.load(id);
   if (entity == null) {
     entity = new TransactionEntity(id);
-    entity.sender = event.transaction.from.toHexString();
+    entity.sender = event.address.toHexString();
     entity.target = event.params.target.toHexString();
     entity.value = event.params.value.toHexString();
     entity.data = event.params.data.toHexString();
@@ -22,7 +22,7 @@ export function handleInvoked(event: Invoked): void {
     entity.userOpHash = "";
     entity.save();
   } else {
-    entity.sender = event.transaction.from.toHexString();
+    entity.sender = event.address.toHexString();
     entity.target = event.params.target.toHexString();
     entity.value = event.params.value.toHexString();
     entity.data = event.params.data.toHexString();
@@ -35,9 +35,10 @@ export function handleSessionCreated(event: SessionCreated): void {
   log.info("Event SessionCreated: sessionUser={}", [
     event.params.sessionUser.toHexString(),
   ]);
-  const id = event.transaction.hash.toHex();
+  const id =
+    event.address.toHexString() + event.params.sessionUser.toHexString();
   var entity = new SessionEntity(id);
-  entity.sender = event.transaction.from.toHexString();
+  entity.sender = event.address.toHexString();
   entity.sessionUser = event.params.sessionUser.toHexString();
   entity.startFrom = event.params.startFrom;
   entity.validUntil = event.params.validUntil;
@@ -50,13 +51,25 @@ export function handleSessionRemoved(event: SessionRemoved): void {
   log.info("Event SessionRemoved: sessionUser={}", [
     event.params.sessionUser.toHexString(),
   ]);
-  const id = event.transaction.hash.toHex();
-  var entity = new SessionEntity(id);
-  entity.sender = event.transaction.from.toHexString();
-  entity.sessionUser = event.params.sessionUser.toHexString();
-  entity.startFrom = event.params.startFrom;
-  entity.validUntil = event.params.validUntil;
-  entity.totalAmount = event.params.totalAmount;
-  entity.deleted = true;
-  entity.save();
+  const id =
+    event.address.toHexString() + event.params.sessionUser.toHexString();
+  var entity = SessionEntity.load(id);
+  if (entity == null) {
+    entity = new SessionEntity(id);
+    entity.sender = event.address.toHexString();
+    entity.sessionUser = event.params.sessionUser.toHexString();
+    entity.startFrom = event.params.startFrom;
+    entity.validUntil = event.params.validUntil;
+    entity.totalAmount = event.params.totalAmount;
+    entity.deleted = true;
+    entity.save();
+  } else {
+    entity.sender = event.address.toHexString();
+    entity.sessionUser = event.params.sessionUser.toHexString();
+    entity.startFrom = event.params.startFrom;
+    entity.validUntil = event.params.validUntil;
+    entity.totalAmount = event.params.totalAmount;
+    entity.deleted = true;
+    entity.save();
+  }
 }

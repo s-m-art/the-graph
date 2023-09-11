@@ -5,7 +5,7 @@ type AccountEntity @entity {
 }
 
 type SessionEntity @entity {
-  id: ID!
+  id: String!
   sender: String!
   sessionUser: String!
   startFrom: BigInt!
